@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>AR A-Frame — Pilih Hantu</title>
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <!-- AR.js -->
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.js"></script>
+
+  <style>
+    body { margin:0; font-family: sans-serif; }
+    .ui {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+      flex-wrap: wrap;
+    }
+    .btn {
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn:active { transform: translateY(1px); }
+    .model-name {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      z-index: 10;
+      background: rgba(0,0,0,0.35);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!-- UI -->
+  <div class="ui" id="controls">
+    <button class="btn" data-model="Gundul">Gundul</button>
+    <button class="btn" data-model="Tuyul">Tuyul</button>
+    <button class="btn" data-model="Genderuwo">Genderuwo</button>
+    <button class="btn" data-model="Kuntilanak">Kuntilanak</button>
+    <button class="btn" data-model="Pocong">Pocong</button>
+    <button class="btn" data-model="Wewe">Wewe</button>
+    <button class="btn" id="btn-scale-up">Scale +</button>
+    <button class="btn" id="btn-scale-down">Scale -</button>
+    <button class="btn" id="btn-rotate">Rotate ↺</button>
+    <button class="btn" id="btn-cycle">Cycle</button>
+  </div>
+
+  <div class="model-name" id="modelName">--</div>
+
+  <!-- A-Frame scene -->
+  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+    <!-- Model wrapper -->
+    <a-entity id="modelWrapper" position="0 0 -3" rotation="0 0 0" scale="0.6 0.6 0.6">
+      <a-entity id="activeModel" gltf-model="url(Assets/Genderuwo 2.glb)" rotation="0 180 0"></a-entity>
+    </a-entity>
+
+    <!-- Kamera -->
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <script>
+    // Daftar model sesuai folder Assets/
+    const models = {
+      "Gundul": "url(Assets/Gundul.glb)",
+      "Tuyul": "url(Assets/Tuyul 2.glb)",
+      "Genderuwo": "url(Assets/Genderuwo 2.glb)",
+      "Kuntilanak": "url(Assets/Kuntilanak.glb)",
+      "Pocong": "url(Assets/Pocong.glb)",
+      "Wewe": "url(Assets/Wewe gombel.glb)"
+    };
+
+    const order = Object.keys(models);
+    let currentIndex = 0;
+
+    const activeModelEl = document.getElementById('activeModel');
+    const modelNameEl = document.getElementById('modelName');
+    const wrapper = document.getElementById('modelWrapper');
+
+    function setModelByName(name) {
+      const asset = models[name];
+      if (!asset) return;
+      activeModelEl.setAttribute('gltf-model', asset);
+      modelNameEl.innerText = name;
+      console.log("Model berhasil dimuat:", asset);
+    }
+    setModelByName(order[currentIndex]);
+
+    // Pilih model via tombol
+    document.querySelectorAll('.ui .btn[data-model]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const nm = btn.getAttribute('data-model');
+        currentIndex = order.indexOf(nm);
+        setModelByName(nm);
+      });
+    });
+
+    // Scale
+    document.getElementById('btn-scale-up').addEventListener('click', () => {
+      let s = wrapper.getAttribute('scale');
+      s = { x: s.x * 1.2, y: s.y * 1.2, z: s.z * 1.2 };
+      wrapper.setAttribute('scale', `${s.x} ${s.y} ${s.z}`);
+    });
+    document.getElementById('btn-scale-down').addEventListener('click', () => {
+      let s = wrapper.getAttribute('scale');
+      s = { x: s.x / 1.2, y: s.y / 1.2, z: s.z / 1.2 };
+      wrapper.setAttribute('scale', `${s.x} ${s.y} ${s.z}`);
+    });
+
+    // Rotate
+    let rotating = false;
+    let rotateInterval = null;
+    document.getElementById('btn-rotate').addEventListener('click', () => {
+      rotating = !rotating;
+      if (rotating) {
+        rotateInterval = setInterval(() => {
+          const r = wrapper.getAttribute('rotation');
+          wrapper.setAttribute('rotation', `${r.x} ${r.y + 2} ${r.z}`);
+        }, 40);
+      } else {
+        clearInterval(rotateInterval);
+      }
+    });
+
+    // Cycle model
+    document.getElementById('btn-cycle').addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % order.length;
+      setModelByName(order[currentIndex]);
+    });
+  </script>
+</body>
+</html>
