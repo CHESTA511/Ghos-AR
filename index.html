@@ -5,48 +5,97 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>AR A-Frame — Pilih Hantu</title>
 
-  <!-- A-Frame -->
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-
-  <!-- AR.js -->
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.js"></script>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/3.3.2/aframe/build/aframe-ar.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
 
   <style>
-    body { margin:0; font-family: sans-serif; }
+    body { 
+      margin: 0; 
+      overflow: hidden;
+      font-family: sans-serif; 
+    }
     .ui {
       position: absolute;
       left: 12px;
       top: 12px;
       display: flex;
       gap: 8px;
-      z-index: 10;
+      z-index: 10000;
       flex-wrap: wrap;
     }
     .btn {
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.7);
       color: white;
       border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
+      padding: 8px 12px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
+      backdrop-filter: blur(10px);
     }
-    .btn:active { transform: translateY(1px); }
+    .btn:hover { background: rgba(0,0,0,0.9); }
+    .btn.active {
+      background: #4CAF50;
+      border: 2px solid white;
+    }
     .model-name {
+      position: absolute;
+      left: 50%;
+      top: 20px;
+      transform: translateX(-50%);
+      z-index: 10000;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 18px;
+      z-index: 10000;
+    }
+    .controls-info {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      z-index: 10000;
+      max-width: 150px;
+    }
+    .position-controls {
       position: absolute;
       left: 12px;
       bottom: 12px;
-      z-index: 10;
-      background: rgba(0,0,0,0.35);
+      z-index: 10000;
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .pos-btn {
+      background: rgba(255,255,255,0.2);
       color: white;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 14px;
+      border: none;
+      padding: 5px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 10px;
     }
   </style>
 </head>
 <body>
-  <!-- UI -->
+  <div class="loading" id="loading">Mengaktifkan Kamera...</div>
+
   <div class="ui" id="controls">
     <button class="btn" data-model="Gundul">Gundul</button>
     <button class="btn" data-model="Tuyul">Tuyul</button>
@@ -58,88 +107,289 @@
     <button class="btn" id="btn-scale-down">Scale -</button>
     <button class="btn" id="btn-rotate">Rotate ↺</button>
     <button class="btn" id="btn-cycle">Cycle</button>
+    <button class="btn" id="btn-show-all">Show All</button>
   </div>
 
-  <div class="model-name" id="modelName">--</div>
+  <div class="model-name" id="modelName">Pilih Model</div>
+  
+  <div class="controls-info">
+    ⚡ Tips: Setiap model memiliki entity terpisah
+  </div>
 
-  <!-- A-Frame scene -->
-  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-    <!-- Model wrapper -->
-    <a-entity id="modelWrapper" position="0 0 -3" rotation="0 0 0" scale="0.6 0.6 0.6">
-      <a-entity id="activeModel" gltf-model="url(Assets/Genderuwo 2.glb)" rotation="0 180 0"></a-entity>
+  <div class="position-controls" id="positionControls" style="display: none;">
+    <button class="pos-btn" data-axis="x" data-direction="+">X+</button>
+    <button class="pos-btn" data-axis="x" data-direction="-">X-</button>
+    <button class="pos-btn" data-axis="y" data-direction="+">Y+</button>
+    <button class="pos-btn" data-axis="y" data-direction="-">Y-</button>
+    <button class="pos-btn" data-axis="z" data-direction="+">Z+</button>
+    <button class="pos-btn" data-axis="z" data-direction="-">Z-</button>
+    <button class="pos-btn" id="btn-save-pos">Save Position</button>
+  </div>
+
+  <!-- SCENE DENGAN ENTITY TERPISAH UNTUK SETIAP MODEL -->
+  <a-scene 
+    embedded 
+    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono;"
+    renderer="logarithmicDepthBuffer: true;"
+    vr-mode-ui="enabled: false">
+    
+    <!-- WRAPPER UNTUK SEMUA MODEL -->
+    <a-entity id="modelsContainer" position="0 0 -2" scale="1 1 1">
+      <!-- SETIAP MODEL MEMILIKI ENTITY SENDIRI -->
+      <a-entity id="model-Gundul" class="model-entity" gltf-model="./Assets/GundulPringis.glb" position="0 -1.5000000000000002 -10.09999999999998" scale="0.5787037037037038 0.5787037037037038 0.5787037037037038" animation-mixer="loop: repeat">
+      </a-entity>
+      
+      <a-entity id="model-Tuyul" class="model-entity" gltf-model="./Assets/Tuyul2.glb" position="2.7755575615628914e-17 -0.4 -0.7" scale="0.401877572016461 0.401877572016461 0.401877572016461" animation-mixer="loop: repeat">
+      </a-entity>
+      
+      <a-entity id="model-Genderuwo" class="model-entity" gltf-model="./Assets/Genderuwo2.glb" position="-2.7755575615628914e-17 -0.4 0" scale="0.48225308641975323 0.48225308641975323 0.48225308641975323" animation-mixer="loop: repeat">
+      </a-entity>
+      
+      <a-entity id="model-Kuntilanak" class="model-entity" gltf-model="./Assets/Kuntilanak.glb" position="0 -0.6 -0.5" scale="0.1615055828898458 0.1615055828898458 0.1615055828898458" animation-mixer="loop: repeat">
+      </a-entity>
+      
+      <a-entity id="model-Pocong" class="model-entity" gltf-model="./Assets/Pocong.glb" position="0 -0.7999999999999999 -0.5" scale="0.2790816472336535 0.2790816472336535 0.2790816472336535" animation-mixer="loop: repeat">
+      </a-entity>
+      
+      <a-entity id="model-Wewe" class="model-entity" gltf-model="./Assets/Wewegombel.glb" position="0 -0.7999999999999999 -1.7000000000000004" scale="0.11215665478461513 0.11215665478461513 0.11215665478461513" animation-mixer="loop: repeat">
+      </a-entity>
     </a-entity>
 
-    <!-- Kamera -->
     <a-entity camera></a-entity>
   </a-scene>
 
   <script>
-    // Daftar model sesuai folder Assets/
     const models = {
-      "Gundul": "url(Assets/Gundul.glb)",
-      "Tuyul": "url(Assets/Tuyul 2.glb)",
-      "Genderuwo": "url(Assets/Genderuwo 2.glb)",
-      "Kuntilanak": "url(Assets/Kuntilanak.glb)",
-      "Pocong": "url(Assets/Pocong.glb)",
-      "Wewe": "url(Assets/Wewe gombel.glb)"
+      "Gundul": { id: "model-Gundul", defaultPos: "0 0 0" },
+      "Tuyul": { id: "model-Tuyul", defaultPos: "0.5 0 0" },
+      "Genderuwo": { id: "model-Genderuwo", defaultPos: "-0.5 0 0" },
+      "Kuntilanak": { id: "model-Kuntilanak", defaultPos: "0 0 0.5" },
+      "Pocong": { id: "model-Pocong", defaultPos: "0 0 -0.5" },
+      "Wewe": { id: "model-Wewe", defaultPos: "0 0.5 0" }
     };
 
     const order = Object.keys(models);
     let currentIndex = 0;
+    let currentModelName = null;
+    let allModelsVisible = false;
 
-    const activeModelEl = document.getElementById('activeModel');
     const modelNameEl = document.getElementById('modelName');
-    const wrapper = document.getElementById('modelWrapper');
+    const containerEl = document.getElementById('modelsContainer');
+    const loadingEl = document.getElementById('loading');
+    const positionControlsEl = document.getElementById('positionControls');
+    const sceneEl = document.querySelector('a-scene');
 
-    function setModelByName(name) {
-      const asset = models[name];
-      if (!asset) return;
-      activeModelEl.setAttribute('gltf-model', asset);
-      modelNameEl.innerText = name;
-      console.log("Model berhasil dimuat:", asset);
+    // Hide all models
+    function hideAllModels() {
+      document.querySelectorAll('.model-entity').forEach(entity => {
+        entity.setAttribute('visible', 'false');
+      });
+      allModelsVisible = false;
     }
-    setModelByName(order[currentIndex]);
 
-    // Pilih model via tombol
-    document.querySelectorAll('.ui .btn[data-model]').forEach(btn => {
+    // Show specific model
+    function showModel(modelName) {
+      hideAllModels();
+      const modelConfig = models[modelName];
+      if (modelConfig) {
+        const entity = document.getElementById(modelConfig.id);
+        entity.setAttribute('visible', 'true');
+        currentModelName = modelName;
+        modelNameEl.innerText = modelName;
+        
+        // Update active button
+        document.querySelectorAll('.btn[data-model]').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        document.querySelector(`.btn[data-model="${modelName}"]`).classList.add('active');
+        
+        // Show position controls
+        positionControlsEl.style.display = 'flex';
+      }
+    }
+
+    // Show all models
+    function showAllModels() {
+      document.querySelectorAll('.model-entity').forEach(entity => {
+        entity.setAttribute('visible', 'true');
+      });
+      allModelsVisible = true;
+      modelNameEl.innerText = 'All Models Visible';
+      positionControlsEl.style.display = 'none';
+    }
+
+    // Get current active entity
+    function getCurrentEntity() {
+      if (allModelsVisible) return containerEl;
+      if (currentModelName) {
+        return document.getElementById(models[currentModelName].id);
+      }
+      return null;
+    }
+
+    // Position controls
+    document.querySelectorAll('.pos-btn[data-axis]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const nm = btn.getAttribute('data-model');
-        currentIndex = order.indexOf(nm);
-        setModelByName(nm);
+        const entity = getCurrentEntity();
+        if (!entity) return;
+        
+        const axis = btn.getAttribute('data-axis');
+        const direction = btn.getAttribute('data-direction') === '+' ? 1 : -1;
+        const amount = 0.1;
+        
+        const pos = entity.getAttribute('position');
+        const newPos = { ...pos };
+        newPos[axis] = pos[axis] + (amount * direction);
+        
+        entity.setAttribute('position', newPos);
+        
+        console.log(`${currentModelName} Position:`, newPos);
+        modelNameEl.innerHTML = `${currentModelName}<br>X:${newPos.x.toFixed(1)} Y:${newPos.y.toFixed(1)} Z:${newPos.z.toFixed(1)}`;
       });
     });
 
-    // Scale
-    document.getElementById('btn-scale-up').addEventListener('click', () => {
-      let s = wrapper.getAttribute('scale');
-      s = { x: s.x * 1.2, y: s.y * 1.2, z: s.z * 1.2 };
-      wrapper.setAttribute('scale', `${s.x} ${s.y} ${s.z}`);
-    });
-    document.getElementById('btn-scale-down').addEventListener('click', () => {
-      let s = wrapper.getAttribute('scale');
-      s = { x: s.x / 1.2, y: s.y / 1.2, z: s.z / 1.2 };
-      wrapper.setAttribute('scale', `${s.x} ${s.y} ${s.z}`);
+    // Save position to localStorage
+    document.getElementById('btn-save-pos').addEventListener('click', () => {
+      const entity = getCurrentEntity();
+      if (!entity || !currentModelName) return;
+      
+      const pos = entity.getAttribute('position');
+      const scale = entity.getAttribute('scale');
+      const rotation = entity.getAttribute('rotation');
+      
+      const savedData = {
+        position: pos,
+        scale: scale,
+        rotation: rotation
+      };
+      
+      localStorage.setItem(`model-pos-${currentModelName}`, JSON.stringify(savedData));
+      modelNameEl.innerHTML = `Position saved for ${currentModelName}`;
+      
+      setTimeout(() => {
+        modelNameEl.innerText = currentModelName;
+      }, 2000);
     });
 
-    // Rotate
-    let rotating = false;
-    let rotateInterval = null;
+    // Load saved positions
+    function loadSavedPositions() {
+      order.forEach(modelName => {
+        const saved = localStorage.getItem(`model-pos-${modelName}`);
+        if (saved) {
+          try {
+            const data = JSON.parse(saved);
+            const entity = document.getElementById(models[modelName].id);
+            entity.setAttribute('position', data.position);
+            entity.setAttribute('scale', data.scale);
+            entity.setAttribute('rotation', data.rotation);
+          } catch (e) {
+            console.error('Error loading saved position:', e);
+          }
+        }
+      });
+    }
+
+    // Scale controls (affect container when showing all, or individual model)
+    document.getElementById('btn-scale-up').addEventListener('click', () => {
+      const entity = allModelsVisible ? containerEl : getCurrentEntity();
+      if (!entity) return;
+      
+      const scale = entity.getAttribute('scale');
+      const newScale = {
+        x: scale.x * 1.2,
+        y: scale.y * 1.2, 
+        z: scale.z * 1.2
+      };
+      entity.setAttribute('scale', newScale);
+      modelNameEl.innerHTML = `Scale: ${newScale.x.toFixed(1)}`;
+    });
+
+    document.getElementById('btn-scale-down').addEventListener('click', () => {
+      const entity = allModelsVisible ? containerEl : getCurrentEntity();
+      if (!entity) return;
+      
+      const scale = entity.getAttribute('scale');
+      const newScale = {
+        x: scale.x / 1.2,
+        y: scale.y / 1.2,
+        z: scale.z / 1.2
+      };
+      entity.setAttribute('scale', newScale);
+      modelNameEl.innerHTML = `Scale: ${newScale.x.toFixed(1)}`;
+    });
+
+    // Rotation control
+    let isRotating = false;
     document.getElementById('btn-rotate').addEventListener('click', () => {
-      rotating = !rotating;
-      if (rotating) {
-        rotateInterval = setInterval(() => {
-          const r = wrapper.getAttribute('rotation');
-          wrapper.setAttribute('rotation', `${r.x} ${r.y + 2} ${r.z}`);
-        }, 40);
-      } else {
-        clearInterval(rotateInterval);
+      isRotating = !isRotating;
+      modelNameEl.innerHTML = isRotating ? 'Rotating ON' : 'Rotating OFF';
+      if (isRotating) {
+        rotateModel();
       }
     });
 
-    // Cycle model
+    function rotateModel() {
+      if (!isRotating) return;
+      const entity = allModelsVisible ? containerEl : getCurrentEntity();
+      if (!entity) return;
+      
+      const rotation = entity.getAttribute('rotation');
+      entity.setAttribute('rotation', {
+        x: rotation.x,
+        y: rotation.y + 1,
+        z: rotation.z
+      });
+      requestAnimationFrame(rotateModel);
+    }
+
+    // Event listeners untuk tombol model
+    document.querySelectorAll('.btn[data-model]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modelName = btn.getAttribute('data-model');
+        currentIndex = order.indexOf(modelName);
+        showModel(modelName);
+      });
+    });
+
+    // Show all models
+    document.getElementById('btn-show-all').addEventListener('click', showAllModels);
+
+    // Cycle models
     document.getElementById('btn-cycle').addEventListener('click', () => {
       currentIndex = (currentIndex + 1) % order.length;
-      setModelByName(order[currentIndex]);
+      showModel(order[currentIndex]);
+    });
+
+    // Scene loaded
+    sceneEl.addEventListener('loaded', function() {
+      setTimeout(() => {
+        loadingEl.style.display = 'none';
+        loadSavedPositions();
+        showModel(order[currentIndex]);
+      }, 1500);
+    });
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      switch(e.key) {
+        case 'ArrowRight':
+          currentIndex = (currentIndex + 1) % order.length;
+          showModel(order[currentIndex]);
+          break;
+        case 'ArrowLeft':
+          currentIndex = (currentIndex - 1 + order.length) % order.length;
+          showModel(order[currentIndex]);
+          break;
+        case 'a':
+        case 'A':
+          showAllModels();
+          break;
+      }
+    });
+
+    // Error handling
+    window.addEventListener('error', function(e) {
+      console.error('Global error:', e.error);
     });
   </script>
 </body>
