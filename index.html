@@ -10,48 +10,155 @@
   <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+    
     body { 
       margin: 0; 
       overflow: hidden;
-      font-family: sans-serif; 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #000;
     }
-    .ui {
+
+    /* Model Selection Buttons - Top */
+    .model-selection {
       position: absolute;
-      left: 12px;
       top: 12px;
-      display: flex;
+      left: 12px;
+      right: 12px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
       z-index: 10000;
-      flex-wrap: wrap;
     }
-    .btn {
-      background: rgba(0,0,0,0.7);
+
+    .model-btn {
+      background: rgba(0,0,0,0.8);
       color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 8px;
+      border: 2px solid rgba(255,255,255,0.2);
+      padding: 10px 8px;
+      border-radius: 12px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 13px;
+      font-weight: 500;
       backdrop-filter: blur(10px);
+      text-align: center;
+      transition: all 0.3s ease;
     }
-    .btn:hover { background: rgba(0,0,0,0.9); }
-    .btn.active {
+
+    .model-btn:hover { 
+      background: rgba(0,0,0,0.9);
+      border-color: rgba(255,255,255,0.4);
+    }
+
+    .model-btn.active {
       background: #4CAF50;
-      border: 2px solid white;
+      border-color: white;
+      color: white;
+      transform: scale(0.95);
     }
+
+    /* Model Name Display - Center Top */
     .model-name {
       position: absolute;
       left: 50%;
-      top: 20px;
+      top: 100px;
       transform: translateX(-50%);
       z-index: 10000;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.8);
       color: white;
       padding: 8px 16px;
       border-radius: 20px;
       font-size: 14px;
       backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
     }
+
+    /* Control Buttons - Right Side */
+    .control-buttons {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 10000;
+    }
+
+    .ctrl-btn {
+      background: rgba(0,0,0,0.8);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .ctrl-btn:hover { 
+      background: rgba(255,255,255,0.2);
+      border-color: white;
+    }
+
+    .ctrl-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Position Controls - Bottom */
+    .position-controls {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 10000;
+      display: none;
+      background: rgba(0,0,0,0.8);
+      border-radius: 16px;
+      padding: 12px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .position-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .pos-btn {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .pos-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .pos-btn.save {
+      grid-column: 1 / -1;
+      background: #4CAF50;
+      border-color: #4CAF50;
+      margin-top: 4px;
+    }
+
+    /* Loading Screen */
     .loading {
       position: absolute;
       top: 50%;
@@ -60,95 +167,145 @@
       color: white;
       font-size: 18px;
       z-index: 10000;
+      text-align: center;
     }
-    .controls-info {
-      position: absolute;
-      right: 12px;
-      top: 12px;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 11px;
-      z-index: 10000;
-      max-width: 150px;
+
+    .loading::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 40px;
+      margin: 20px auto;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
     }
-    .position-controls {
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Info Panel */
+    .info-panel {
       position: absolute;
       left: 12px;
-      bottom: 12px;
-      z-index: 10000;
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-    }
-    .pos-btn {
-      background: rgba(255,255,255,0.2);
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.8);
       color: white;
-      border: none;
-      padding: 5px 8px;
-      border-radius: 5px;
-      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 12px;
       font-size: 10px;
+      z-index: 10000;
+      max-width: 120px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      line-height: 1.3;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      .model-selection {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        left: 8px;
+        right: 8px;
+        top: 8px;
+      }
+      
+      .model-btn {
+        font-size: 12px;
+        padding: 8px 6px;
+      }
+      
+      .control-buttons {
+        right: 8px;
+      }
+      
+      .ctrl-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 14px;
+      }
+      
+      .position-controls {
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+      }
+    }
+
+    @media (max-height: 600px) {
+      .model-name {
+        top: 80px;
+      }
+      
+      .control-buttons {
+        top: 40%;
+      }
     }
   </style>
 </head>
 <body>
   <div class="loading" id="loading">Mengaktifkan Kamera...</div>
 
-  <div class="ui" id="controls">
-    <button class="btn" data-model="Gundul">Gundul</button>
-    <button class="btn" data-model="Tuyul">Tuyul</button>
-    <button class="btn" data-model="Genderuwo">Genderuwo</button>
-    <button class="btn" data-model="Kuntilanak">Kuntilanak</button>
-    <button class="btn" data-model="Pocong">Pocong</button>
-    <button class="btn" data-model="Wewe">Wewe</button>
-    <button class="btn" id="btn-scale-up">Scale +</button>
-    <button class="btn" id="btn-scale-down">Scale -</button>
-    <button class="btn" id="btn-rotate">Rotate ↺</button>
-    <button class="btn" id="btn-cycle">Cycle</button>
-    <button class="btn" id="btn-show-all">Show All</button>
+  <!-- Model Selection Buttons -->
+  <div class="model-selection" id="modelSelection">
+    <button class="model-btn" data-model="Gundul">👻 Gundul</button>
+    <button class="model-btn" data-model="Tuyul">🧒 Tuyul</button>
+    <button class="model-btn" data-model="Genderuwo">👹 Genderuwo</button>
+    <button class="model-btn" data-model="Kuntilanak">👘 Kuntilanak</button>
+    <button class="model-btn" data-model="Pocong">⚪ Pocong</button>
+    <button class="model-btn" data-model="Wewe">👵 Wewe</button>
   </div>
 
-  <div class="model-name" id="modelName">Pilih Model</div>
+  
 
-  <div class="position-controls" id="positionControls" style="display: none;">
-    <button class="pos-btn" data-axis="x" data-direction="+">X+</button>
-    <button class="pos-btn" data-axis="x" data-direction="-">X-</button>
-    <button class="pos-btn" data-axis="y" data-direction="+">Y+</button>
-    <button class="pos-btn" data-axis="y" data-direction="-">Y-</button>
-    <button class="pos-btn" data-axis="z" data-direction="+">Z+</button>
-    <button class="pos-btn" data-axis="z" data-direction="-">Z-</button>
-    <button class="pos-btn" id="btn-save-pos">Save Position</button>
+  <!-- Control Buttons -->
+  <div class="control-buttons">
+    <button class="ctrl-btn" id="btn-scale-up" title="Scale Up">+</button>
+    <button class="ctrl-btn" id="btn-scale-down" title="Scale Down">−</button>
+    <button class="ctrl-btn" id="btn-rotate" title="Rotate">↻</button>
+    <button class="ctrl-btn" id="btn-cycle" title="Cycle Models">⟲</button>
   </div>
 
-  <!-- SCENE DENGAN ENTITY TERPISAH UNTUK SETIAP MODEL -->
+  
+
+  <!-- Position Controls -->
+  <div class="position-controls" id="positionControls">
+    <div class="position-grid">
+      <button class="pos-btn" data-axis="x" data-direction="-">← X</button>
+      <button class="pos-btn" data-axis="y" data-direction="+">↑ Y</button>
+      <button class="pos-btn" data-axis="x" data-direction="+">X →</button>
+      <button class="pos-btn" data-axis="z" data-direction="+">↗ Z</button>
+      <button class="pos-btn" data-axis="y" data-direction="-">↓ Y</button>
+      <button class="pos-btn" data-axis="z" data-direction="-">Z ↙</button>
+    </div>
+    <button class="pos-btn save" id="btn-save-pos">💾 Save Position</button>
+  </div>
+
+  <!-- A-Frame Scene -->
   <a-scene 
     embedded 
     arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono;"
     renderer="logarithmicDepthBuffer: true;"
     vr-mode-ui="enabled: false">
     
-    <!-- WRAPPER UNTUK SEMUA MODEL -->
+    <!-- Models Container -->
     <a-entity id="modelsContainer" position="0 0 -2" scale="1 1 1">
-      <!-- SETIAP MODEL MEMILIKI ENTITY SENDIRI -->
-      <a-entity id="model-Gundul" class="model-entity" gltf-model="./Assets/GundulPringis.glb" position="0 -1.5000000000000002 -10.09999999999998" scale="0.5787037037037038 0.5787037037037038 0.5787037037037038" animation-mixer="loop: repeat">
-      </a-entity>
+      <a-entity id="model-Gundul" class="model-entity" gltf-model="./Assets/GundulPringis.glb" position="0 -1.5000000000000002 -10.09999999999998" scale="0.5787037037037038 0.5787037037037038 0.5787037037037038" animation-mixer="loop: repeat"></a-entity>
       
-      <a-entity id="model-Tuyul" class="model-entity" gltf-model="./Assets/Tuyul2.glb" position="2.7755575615628914e-17 -0.4 -0.7" scale="0.401877572016461 0.401877572016461 0.401877572016461" animation-mixer="loop: repeat">
-      </a-entity>
+      <a-entity id="model-Tuyul" class="model-entity" gltf-model="./Assets/Tuyul2.glb" position="2.7755575615628914e-17 -0.4 -0.7" scale="0.401877572016461 0.401877572016461 0.401877572016461" animation-mixer="loop: repeat"></a-entity>
       
-      <a-entity id="model-Genderuwo" class="model-entity" gltf-model="./Assets/Genderuwo2.glb" position="-2.7755575615628914e-17 -0.4 0" scale="0.48225308641975323 0.48225308641975323 0.48225308641975323" animation-mixer="loop: repeat">
-      </a-entity>
+      <a-entity id="model-Genderuwo" class="model-entity" gltf-model="./Assets/Genderuwo2.glb" position="-2.7755575615628914e-17 -0.4 0" scale="0.48225308641975323 0.48225308641975323 0.48225308641975323" animation-mixer="loop: repeat"></a-entity>
       
-      <a-entity id="model-Kuntilanak" class="model-entity" gltf-model="./Assets/Kuntilanak.glb" position="0 -0.6 -0.5" scale="0.1615055828898458 0.1615055828898458 0.1615055828898458" animation-mixer="loop: repeat">
-      </a-entity>
+      <a-entity id="model-Kuntilanak" class="model-entity" gltf-model="./Assets/Kuntilanak.glb" position="0 -0.6 -0.5" scale="0.1615055828898458 0.1615055828898458 0.1615055828898458" animation-mixer="loop: repeat"></a-entity>
       
-      <a-entity id="model-Pocong" class="model-entity" gltf-model="./Assets/Pocong.glb" position="0 -0.7999999999999999 -0.5" scale="0.2790816472336535 0.2790816472336535 0.2790816472336535" animation-mixer="loop: repeat">
-      </a-entity>
+      <a-entity id="model-Pocong" class="model-entity" gltf-model="./Assets/Pocong.glb" position="0 -0.7999999999999999 -0.5" scale="0.2790816472336535 0.2790816472336535 0.2790816472336535" animation-mixer="loop: repeat"></a-entity>
       
-      <a-entity id="model-Wewe" class="model-entity" gltf-model="./Assets/Wewegombel.glb" position="0 -0.7999999999999999 -1.7000000000000004" scale="0.11215665478461513 0.11215665478461513 0.11215665478461513" animation-mixer="loop: repeat">
-      </a-entity>
+      <a-entity id="model-Wewe" class="model-entity" gltf-model="./Assets/Wewegombel.glb" position="0 -0.7999999999999999 -1.7000000000000004" scale="0.11215665478461513 0.11215665478461513 0.11215665478461513" animation-mixer="loop: repeat"></a-entity>
     </a-entity>
 
     <a-entity camera></a-entity>
@@ -169,7 +326,7 @@
     let currentModelName = null;
     let allModelsVisible = false;
 
-    const modelNameEl = document.getElementById('modelName');
+  // ...existing code...
     const containerEl = document.getElementById('modelsContainer');
     const loadingEl = document.getElementById('loading');
     const positionControlsEl = document.getElementById('positionControls');
@@ -191,16 +348,14 @@
         const entity = document.getElementById(modelConfig.id);
         entity.setAttribute('visible', 'true');
         currentModelName = modelName;
-        modelNameEl.innerText = modelName;
-        
+  // ...existing code...
         // Update active button
-        document.querySelectorAll('.btn[data-model]').forEach(btn => {
+        document.querySelectorAll('.model-btn').forEach(btn => {
           btn.classList.remove('active');
         });
-        document.querySelector(`.btn[data-model="${modelName}"]`).classList.add('active');
-        
+        document.querySelector(`.model-btn[data-model="${modelName}"]`).classList.add('active');
         // Show position controls
-        positionControlsEl.style.display = 'flex';
+        positionControlsEl.style.display = 'block';
       }
     }
 
@@ -212,6 +367,11 @@
       allModelsVisible = true;
       modelNameEl.innerText = 'All Models Visible';
       positionControlsEl.style.display = 'none';
+      
+      // Clear active states
+      document.querySelectorAll('.model-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
     }
 
     // Get current active entity
@@ -240,7 +400,7 @@
         entity.setAttribute('position', newPos);
         
         console.log(`${currentModelName} Position:`, newPos);
-        modelNameEl.innerHTML = `${currentModelName}<br>X:${newPos.x.toFixed(1)} Y:${newPos.y.toFixed(1)} Z:${newPos.z.toFixed(1)}`;
+  // ...existing code...
       });
     });
 
@@ -260,11 +420,7 @@
       };
       
       localStorage.setItem(`model-pos-${currentModelName}`, JSON.stringify(savedData));
-      modelNameEl.innerHTML = `Position saved for ${currentModelName}`;
-      
-      setTimeout(() => {
-        modelNameEl.innerText = currentModelName;
-      }, 2000);
+  // ...existing code...
     });
 
     // Load saved positions
@@ -285,7 +441,7 @@
       });
     }
 
-    // Scale controls (affect container when showing all, or individual model)
+    // Scale controls
     document.getElementById('btn-scale-up').addEventListener('click', () => {
       const entity = allModelsVisible ? containerEl : getCurrentEntity();
       if (!entity) return;
@@ -297,7 +453,7 @@
         z: scale.z * 1.2
       };
       entity.setAttribute('scale', newScale);
-      modelNameEl.innerHTML = `Scale: ${newScale.x.toFixed(1)}`;
+  // ...existing code...
     });
 
     document.getElementById('btn-scale-down').addEventListener('click', () => {
@@ -311,14 +467,16 @@
         z: scale.z / 1.2
       };
       entity.setAttribute('scale', newScale);
-      modelNameEl.innerHTML = `Scale: ${newScale.x.toFixed(1)}`;
+  // ...existing code...
     });
 
     // Rotation control
     let isRotating = false;
     document.getElementById('btn-rotate').addEventListener('click', () => {
       isRotating = !isRotating;
-      modelNameEl.innerHTML = isRotating ? 'Rotating ON' : 'Rotating OFF';
+      const rotateBtn = document.getElementById('btn-rotate');
+      rotateBtn.style.backgroundColor = isRotating ? '#4CAF50' : '';
+  // ...existing code...
       if (isRotating) {
         rotateModel();
       }
@@ -339,7 +497,7 @@
     }
 
     // Event listeners untuk tombol model
-    document.querySelectorAll('.btn[data-model]').forEach(btn => {
+    document.querySelectorAll('.model-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const modelName = btn.getAttribute('data-model');
         currentIndex = order.indexOf(modelName);
@@ -347,8 +505,7 @@
       });
     });
 
-    // Show all models
-    document.getElementById('btn-show-all').addEventListener('click', showAllModels);
+  // ...existing code...
 
     // Cycle models
     document.getElementById('btn-cycle').addEventListener('click', () => {
@@ -378,9 +535,43 @@
           break;
         case 'a':
         case 'A':
-          showAllModels();
+          // ...existing code...
           break;
       }
+    });
+
+    // Touch gestures for mobile
+    let touchStartY = 0;
+    let touchStartX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
+    });
+
+    document.addEventListener('touchend', (e) => {
+      if (!touchStartY || !touchStartX) return;
+
+      const touchEndY = e.changedTouches[0].clientY;
+      const touchEndX = e.changedTouches[0].clientX;
+      const diffY = touchStartY - touchEndY;
+      const diffX = touchStartX - touchEndX;
+
+      // Only trigger if swipe is significant
+      if (Math.abs(diffX) > 50 && Math.abs(diffY) < 100) {
+        if (diffX > 0) {
+          // Swipe left - next model
+          currentIndex = (currentIndex + 1) % order.length;
+          showModel(order[currentIndex]);
+        } else {
+          // Swipe right - previous model
+          currentIndex = (currentIndex - 1 + order.length) % order.length;
+          showModel(order[currentIndex]);
+        }
+      }
+
+      touchStartY = 0;
+      touchStartX = 0;
     });
 
     // Error handling
