@@ -295,17 +295,17 @@
     
     <!-- Models Container -->
     <a-entity id="modelsContainer" position="0 0 -2" scale="1 1 1">
-      <a-entity id="model-Gundul" class="model-entity" gltf-model="./Assets/GundulPringis.glb" position="0 -1.5000000000000002 -10.09999999999998" scale="0.5787037037037038 0.5787037037037038 0.5787037037037038" animation-mixer="loop: repeat"></a-entity>
-      
-      <a-entity id="model-Tuyul" class="model-entity" gltf-model="./Assets/Tuyul2.glb" position="2.7755575615628914e-17 -0.4 -0.7" scale="0.401877572016461 0.401877572016461 0.401877572016461" animation-mixer="loop: repeat"></a-entity>
-      
-      <a-entity id="model-Genderuwo" class="model-entity" gltf-model="./Assets/Genderuwo2.glb" position="-2.7755575615628914e-17 -0.4 0" scale="0.48225308641975323 0.48225308641975323 0.48225308641975323" animation-mixer="loop: repeat"></a-entity>
-      
-      <a-entity id="model-Kuntilanak" class="model-entity" gltf-model="./Assets/Kuntilanak.glb" position="0 -0.6 -0.5" scale="0.1615055828898458 0.1615055828898458 0.1615055828898458" animation-mixer="loop: repeat"></a-entity>
-      
-      <a-entity id="model-Pocong" class="model-entity" gltf-model="./Assets/Pocong.glb" position="0 -0.7999999999999999 -0.5" scale="0.2790816472336535 0.2790816472336535 0.2790816472336535" animation-mixer="loop: repeat"></a-entity>
-      
-      <a-entity id="model-Wewe" class="model-entity" gltf-model="./Assets/Wewegombel.glb" position="0 -0.7999999999999999 -1.7000000000000004" scale="0.11215665478461513 0.11215665478461513 0.11215665478461513" animation-mixer="loop: repeat"></a-entity>
+      <a-entity id="model-Gundul" class="model-entity" gltf-model="./Assets/GundulPringis.glb" position="0 -0.5 -1" scale="0.5 0.5 0.5" animation-mixer="loop: repeat"></a-entity>
+
+      <a-entity id="model-Tuyul" class="model-entity" gltf-model="./Assets/Tuyul2.glb" position="0 -0.5 -1" scale="0.4 0.4 0.4" animation-mixer="loop: repeat"></a-entity>
+
+      <a-entity id="model-Genderuwo" class="model-entity" gltf-model="./Assets/Genderuwo2.glb" position="0 -0.5 -1" scale="0.5 0.5 0.5" animation-mixer="loop: repeat"></a-entity>
+
+      <a-entity id="model-Kuntilanak" class="model-entity" gltf-model="./Assets/Kuntilanak.glb" position="0 -0.5 -1" scale="0.16 0.16 0.16" animation-mixer="loop: repeat"></a-entity>
+
+      <a-entity id="model-Pocong" class="model-entity" gltf-model="./Assets/Pocong.glb" position="0 -0.5 -1" scale="0.28 0.28 0.28" animation-mixer="loop: repeat"></a-entity>
+
+      <a-entity id="model-Wewe" class="model-entity" gltf-model="./Assets/Wewegombel.glb" position="0 -0.5 -1" scale="0.11 0.11 0.11" animation-mixer="loop: repeat"></a-entity>
     </a-entity>
 
     <a-entity camera></a-entity>
@@ -313,12 +313,12 @@
 
   <script>
     const models = {
-      "Gundul": { id: "model-Gundul", defaultPos: "0 0 0" },
-      "Tuyul": { id: "model-Tuyul", defaultPos: "0.5 0 0" },
-      "Genderuwo": { id: "model-Genderuwo", defaultPos: "-0.5 0 0" },
-      "Kuntilanak": { id: "model-Kuntilanak", defaultPos: "0 0 0.5" },
-      "Pocong": { id: "model-Pocong", defaultPos: "0 0 -0.5" },
-      "Wewe": { id: "model-Wewe", defaultPos: "0 0.5 0" }
+      "Gundul": { id: "model-Gundul", defaultPos: "0 -0.5 -1" },
+      "Tuyul": { id: "model-Tuyul", defaultPos: "0 -0.5 -1" },
+      "Genderuwo": { id: "model-Genderuwo", defaultPos: "0 -0.5 -1" },
+      "Kuntilanak": { id: "model-Kuntilanak", defaultPos: "0 -0.5 -1" },
+      "Pocong": { id: "model-Pocong", defaultPos: "0 -0.5 -1" },
+      "Wewe": { id: "model-Wewe", defaultPos: "0 -0.5 -1" }
     };
 
     const order = Object.keys(models);
