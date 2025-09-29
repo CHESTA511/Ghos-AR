@@ -2,19 +2,15 @@
 <html lang="id">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <!-- Tambahkan ini di dalam <head> setelah meta viewport -->
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#000000">
-
-<!-- Untuk mencegah zoom pada mobile -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<!-- PWA manifest (opsional) -->
-<link rel="manifest" href="manifest.json">
-  <title>AR A-Frame — Pilih Hantu</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+  
+  <!-- Mobile optimization -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#000000">
+  
+  <title>QR Hantu Scanner - AR Game</title>
 
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/3.3.2/aframe/build/aframe-ar.js"></script>
@@ -32,141 +28,90 @@
       background: #000;
     }
 
-    /* Model Selection Buttons - Top */
-    .model-selection {
+    /* Instructions Panel */
+    .instructions {
       position: absolute;
       top: 12px;
       left: 12px;
       right: 12px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      z-index: 10000;
-    }
-
-    .model-btn {
-      background: rgba(0,0,0,0.8);
-      color: white;
-      border: 2px solid rgba(255,255,255,0.2);
-      padding: 10px 8px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      backdrop-filter: blur(10px);
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-
-    .model-btn:hover { 
       background: rgba(0,0,0,0.9);
-      border-color: rgba(255,255,255,0.4);
-    }
-
-    .model-btn.active {
-      background: #4CAF50;
-      border-color: white;
       color: white;
-      transform: scale(0.95);
+      padding: 16px;
+      border-radius: 12px;
+      z-index: 10000;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      text-align: center;
     }
 
-    /* Model Name Display - Center Top */
-    .model-name {
+    .instructions h3 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      color: #4CAF50;
+    }
+
+    .instructions p {
+      margin: 0;
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    /* Current Model Display */
+    .current-model {
       position: absolute;
       left: 50%;
-      top: 100px;
+      bottom: 100px;
       transform: translateX(-50%);
       z-index: 10000;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.9);
       color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 14px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-
-    /* Control Buttons - Right Side */
-    .control-buttons {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      z-index: 10000;
-    }
-
-    .ctrl-btn {
-      background: rgba(0,0,0,0.8);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 12px;
-      border-radius: 50%;
-      cursor: pointer;
+      padding: 12px 20px;
+      border-radius: 25px;
       font-size: 16px;
-      width: 50px;
-      height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-weight: bold;
       backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
-    }
-
-    .ctrl-btn:hover { 
-      background: rgba(255,255,255,0.2);
-      border-color: white;
-    }
-
-    .ctrl-btn:active {
-      transform: scale(0.95);
-    }
-
-    /* Position Controls - Bottom */
-    .position-controls {
-      position: absolute;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-      z-index: 10000;
+      border: 2px solid #4CAF50;
       display: none;
-      background: rgba(0,0,0,0.8);
-      border-radius: 16px;
+    }
+
+    /* QR List */
+    .qr-list {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      background: rgba(0,0,0,0.9);
+      color: white;
       padding: 12px;
+      border-radius: 12px;
+      z-index: 10000;
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,0.2);
+      font-size: 11px;
+      max-width: 120px;
     }
 
-    .position-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .pos-btn {
-      background: rgba(255,255,255,0.1);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px 8px;
-      border-radius: 8px;
-      cursor: pointer;
+    .qr-list h4 {
+      margin: 0 0 8px 0;
       font-size: 12px;
-      font-weight: 500;
-      transition: all 0.3s ease;
+      color: #4CAF50;
     }
 
-    .pos-btn:hover {
-      background: rgba(255,255,255,0.2);
+    .qr-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
-    .pos-btn.save {
-      grid-column: 1 / -1;
-      background: #4CAF50;
-      border-color: #4CAF50;
-      margin-top: 4px;
+    .qr-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .qr-found {
+      color: #4CAF50;
+      font-weight: bold;
     }
 
     /* Loading Screen */
@@ -188,7 +133,7 @@
       height: 40px;
       margin: 20px auto;
       border: 3px solid rgba(255,255,255,0.3);
-      border-top: 3px solid white;
+      border-top: 3px solid #4CAF50;
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
@@ -198,483 +143,321 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Info Panel */
-    .info-panel {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 12px;
-      font-size: 10px;
-      z-index: 10000;
-      max-width: 120px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.2);
-      line-height: 1.3;
+    /* Hide instructions after some time */
+    .instructions.hidden {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
     }
 
-    /* Responsive adjustments */
+    /* Responsive */
     @media (max-width: 480px) {
-      .model-selection {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 6px;
+      .instructions {
         left: 8px;
         right: 8px;
         top: 8px;
+        padding: 12px;
       }
       
-      .model-btn {
-        font-size: 12px;
-        padding: 8px 6px;
-      }
-      
-      .control-buttons {
+      .qr-list {
         right: 8px;
+        top: 8px;
+        display: none; /* Hide on very small screens */
       }
       
-      .ctrl-btn {
-        width: 45px;
-        height: 45px;
+      .current-model {
+        bottom: 80px;
         font-size: 14px;
-      }
-      
-      .position-controls {
-        left: 8px;
-        right: 8px;
-        bottom: 8px;
-      }
-    }
-
-    @media (max-height: 600px) {
-      .model-name {
-        top: 80px;
-      }
-      
-      .control-buttons {
-        top: 40%;
       }
     }
   </style>
 </head>
 <body>
-  <div class="loading" id="loading">Mengaktifkan Kamera...</div>
+  <div class="loading" id="loading">Mengaktifkan Kamera QR Scanner...</div>
 
-  <!-- Model Selection Buttons -->
-  <div class="model-selection" id="modelSelection">
-    <button class="model-btn" data-model="Gundul">👻 Gundul</button>
-    <button class="model-btn" data-model="Tuyul">🧒 Tuyul</button>
-    <button class="model-btn" data-model="Genderuwo">👹 Genderuwo</button>
-    <button class="model-btn" data-model="Kuntilanak">👘 Kuntilanak</button>
-    <button class="model-btn" data-model="Pocong">⚪ Pocong</button>
-    <button class="model-btn" data-model="Wewe">👵 Wewe</button>
+  <!-- Instructions -->
+  <div class="instructions" id="instructions">
+    <h3>🎯 QR Hantu Scanner</h3>
+    <p>Arahkan kamera ke QR code untuk memunculkan hantu!</p>
   </div>
 
-  
-
-  <!-- Control Buttons -->
-  <div class="control-buttons">
-    <button class="ctrl-btn" id="btn-scale-up" title="Scale Up">+</button>
-    <button class="ctrl-btn" id="btn-scale-down" title="Scale Down">−</button>
-    <button class="ctrl-btn" id="btn-rotate" title="Rotate">↻</button>
-    <button class="ctrl-btn" id="btn-cycle" title="Cycle Models">⟲</button>
+  <!-- Current Model Display -->
+  <div class="current-model" id="currentModel">
+    <span id="modelName">-</span>
   </div>
 
-  
-
-  <!-- Position Controls -->
-  <div class="position-controls" id="positionControls">
-    <div class="position-grid">
-      <button class="pos-btn" data-axis="x" data-direction="-">← X</button>
-      <button class="pos-btn" data-axis="y" data-direction="+">↑ Y</button>
-      <button class="pos-btn" data-axis="x" data-direction="+">X →</button>
-      <button class="pos-btn" data-axis="z" data-direction="+">↗ Z</button>
-      <button class="pos-btn" data-axis="y" data-direction="-">↓ Y</button>
-      <button class="pos-btn" data-axis="z" data-direction="-">Z ↙</button>
+  <!-- QR List -->
+  <div class="qr-list">
+    <h4>QR Codes:</h4>
+    <div class="qr-item">
+      <span>👻 Gundul</span>
+      <span id="status-gundul">-</span>
     </div>
-    <button class="pos-btn save" id="btn-save-pos">💾 Save Position</button>
+    <div class="qr-item">
+      <span>🧒 Tuyul</span>
+      <span id="status-tuyul">-</span>
+    </div>
+    <div class="qr-item">
+      <span>👹 Genderuwo</span>
+      <span id="status-genderuwo">-</span>
+    </div>
+    <div class="qr-item">
+      <span>👘 Kuntilanak</span>
+      <span id="status-kuntilanak">-</span>
+    </div>
+    <div class="qr-item">
+      <span>⚪ Pocong</span>
+      <span id="status-pocong">-</span>
+    </div>
+    <div class="qr-item">
+      <span>👵 Wewe</span>
+      <span id="status-wewe">-</span>
+    </div>
   </div>
 
-  <!-- A-Frame Scene -->
-  <!-- Ganti a-scene dengan konfigurasi ini -->
-<a-scene 
-  embedded 
-  arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono; trackingMethod: best; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960;"
-  renderer="logarithmicDepthBuffer: true; colorManagement: true; sortObjects: true;"
-  vr-mode-ui="enabled: false"
-  device-orientation-permission-ui="enabled: false"
-  background="color: black">
-  
-  <!-- Models Container -->
-  <a-entity id="modelsContainer" position="0 0 -2" scale="1 1 1">
-    <a-entity id="model-Gundul" class="model-entity" gltf-model="./Assets/GundulPringis.glb" position="0 -0.5 -1" scale="0.5 0.5 0.5" animation-mixer="loop: repeat"></a-entity>
-    <a-entity id="model-Tuyul" class="model-entity" gltf-model="./Assets/Tuyul2.glb" position="0 -0.5 -1" scale="0.4 0.4 0.4" animation-mixer="loop: repeat"></a-entity>
-    <a-entity id="model-Genderuwo" class="model-entity" gltf-model="./Assets/Genderuwo2.glb" position="0 -0.5 -1" scale="0.5 0.5 0.5" animation-mixer="loop: repeat"></a-entity>
-    <a-entity id="model-Kuntilanak" class="model-entity" gltf-model="./Assets/Kuntilanak.glb" position="0 -0.5 -1" scale="0.16 0.16 0.16" animation-mixer="loop: repeat"></a-entity>
-    <a-entity id="model-Pocong" class="model-entity" gltf-model="./Assets/Pocong.glb" position="0 -0.5 -1" scale="0.28 0.28 0.28" animation-mixer="loop: repeat"></a-entity>
-    <a-entity id="model-Wewe" class="model-entity" gltf-model="./Assets/Wewegombel.glb" position="0 -0.5 -1" scale="0.11 0.11 0.11" animation-mixer="loop: repeat"></a-entity>
-  </a-entity>
+  <!-- A-Frame Scene with QR Markers -->
+  <a-scene 
+    embedded 
+    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+    renderer="logarithmicDepthBuffer: true; colorManagement: true; sortObjects: true;"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+    background="color: black">
+    
+    <!-- Define Assets -->
+    <a-assets>
+      <a-asset-item id="gundul" src="./Assets/GundulPringis.glb"></a-asset-item>
+      <a-asset-item id="tuyul" src="./Assets/Tuyul2.glb"></a-asset-item>
+      <a-asset-item id="genderuwo" src="./Assets/Genderuwo2.glb"></a-asset-item>
+      <a-asset-item id="kuntilanak" src="./Assets/Kuntilanak.glb"></a-asset-item>
+      <a-asset-item id="pocong" src="./Assets/Pocong.glb"></a-asset-item>
+      <a-asset-item id="wewe" src="./Assets/Wewegombel.glb"></a-asset-item>
+    </a-assets>
 
-  <a-entity camera look-controls-enabled="false" wasd-controls-enabled="false"></a-entity>
-</a-scene>
+    <!-- QR Code Markers -->
+    <!-- Marker untuk Gundul (ID: 0) -->
+    <a-marker type="barcode" value="0" id="marker-gundul">
+      <a-entity 
+        gltf-model="#gundul" 
+        scale="0.5 0.5 0.5" 
+        position="0 0 0"
+        rotation="0 0 0"
+        animation-mixer="loop: repeat"
+        class="model-entity">
+      </a-entity>
+    </a-marker>
+
+    <!-- Marker untuk Tuyul (ID: 1) -->
+    <a-marker type="barcode" value="1" id="marker-tuyul">
+      <a-entity 
+        gltf-model="#tuyul" 
+        scale="0.4 0.4 0.4" 
+        position="0 0 0"
+        rotation="0 0 0"
+        animation-mixer="loop: repeat"
+        class="model-entity">
+      </a-entity>
+    </a-marker>
+
+    <!-- Marker untuk Genderuwo (ID: 2) -->
+    <a-marker type="barcode" value="2" id="marker-genderuwo">
+      <a-entity 
+        gltf-model="#genderuwo" 
+        scale="0.5 0.5 0.5" 
+        position="0 0 0"
+        rotation="0 0 0"
+        animation-mixer="loop: repeat"
+        class="model-entity">
+      </a-entity>
+    </a-marker>
+
+    <!-- Marker untuk Kuntilanak (ID: 3) -->
+    <a-marker type="barcode" value="3" id="marker-kuntilanak">
+      <a-entity 
+        gltf-model="#kuntilanak" 
+        scale="0.16 0.16 0.16" 
+        position="0 0 0"
+        rotation="0 0 0"
+        animation-mixer="loop: repeat"
+        class="model-entity">
+      </a-entity>
+    </a-marker>
+
+    <!-- Marker untuk Pocong (ID: 4) -->
+    <a-marker type="barcode" value="4" id="marker-pocong">
+      <a-entity 
+        gltf-model="#pocong" 
+        scale="0.28 0.28 0.28" 
+        position="0 0 0"
+        rotation="0 0 0"
+        animation-mixer="loop: repeat"
+        class="model-entity">
+      </a-entity>
+    </a-marker>
+
+    <!-- Marker untuk Wewe (ID: 5) -->
+    <a-marker type="barcode" value="5" id="marker-wewe">
+      <a-entity 
+        gltf-model="#wewe" 
+        scale="0.11 0.11 0.11" 
+        position="0 0 0"
+        rotation="0 0 0"
+        animation-mixer="loop: repeat"
+        class="model-entity">
+      </a-entity>
+    </a-marker>
+
+    <!-- Camera -->
+    <a-entity camera look-controls-enabled="false" wasd-controls-enabled="false"></a-entity>
+  </a-scene>
 
   <script>
-    const models = {
-      "Gundul": { id: "model-Gundul", defaultPos: "0 -0.5 -1" },
-      "Tuyul": { id: "model-Tuyul", defaultPos: "0 -0.5 -1" },
-      "Genderuwo": { id: "model-Genderuwo", defaultPos: "0 -0.5 -1" },
-      "Kuntilanak": { id: "model-Kuntilanak", defaultPos: "0 -0.5 -1" },
-      "Pocong": { id: "model-Pocong", defaultPos: "0 -0.5 -1" },
-      "Wewe": { id: "model-Wewe", defaultPos: "0 -0.5 -1" }
+    // QR Code mapping
+    const qrMapping = {
+      'marker-gundul': { name: 'Gundul', emoji: '👻', id: 'gundul' },
+      'marker-tuyul': { name: 'Tuyul', emoji: '🧒', id: 'tuyul' },
+      'marker-genderuwo': { name: 'Genderuwo', emoji: '👹', id: 'genderuwo' },
+      'marker-kuntilanak': { name: 'Kuntilanak', emoji: '👘', id: 'kuntilanak' },
+      'marker-pocong': { name: 'Pocong', emoji: '⚪', id: 'pocong' },
+      'marker-wewe': { name: 'Wewe', emoji: '👵', id: 'wewe' }
     };
 
-    const order = Object.keys(models);
-    let currentIndex = 0;
-    let currentModelName = null;
-    let allModelsVisible = false;
+    // Found markers tracking
+    const foundMarkers = new Set();
+    let currentVisibleMarker = null;
 
-  // ...existing code...
-    const containerEl = document.getElementById('modelsContainer');
+    // DOM elements
     const loadingEl = document.getElementById('loading');
-    const positionControlsEl = document.getElementById('positionControls');
-    const sceneEl = document.querySelector('a-scene');
+    const instructionsEl = document.getElementById('instructions');
+    const currentModelEl = document.getElementById('currentModel');
+    const modelNameEl = document.getElementById('modelName');
 
-    // Hide all models
-    function hideAllModels() {
-      document.querySelectorAll('.model-entity').forEach(entity => {
-        entity.setAttribute('visible', 'false');
-      });
-      allModelsVisible = false;
-    }
-
-    // Show specific model
-    function showModel(modelName) {
-      hideAllModels();
-      const modelConfig = models[modelName];
-      if (modelConfig) {
-        const entity = document.getElementById(modelConfig.id);
-        entity.setAttribute('visible', 'true');
-        currentModelName = modelName;
-  // ...existing code...
-        // Update active button
-        document.querySelectorAll('.model-btn').forEach(btn => {
-          btn.classList.remove('active');
-        });
-        document.querySelector(`.model-btn[data-model="${modelName}"]`).classList.add('active');
-        // Show position controls
-        positionControlsEl.style.display = 'block';
+    // Update status display
+    function updateMarkerStatus(markerId, found) {
+      const statusEl = document.getElementById(`status-${qrMapping[markerId].id}`);
+      if (statusEl) {
+        statusEl.textContent = found ? '✓' : '-';
+        statusEl.className = found ? 'qr-found' : '';
       }
     }
 
-    // Show all models
-    function showAllModels() {
-      document.querySelectorAll('.model-entity').forEach(entity => {
-        entity.setAttribute('visible', 'true');
-      });
-      allModelsVisible = true;
-      modelNameEl.innerText = 'All Models Visible';
-      positionControlsEl.style.display = 'none';
-      
-      // Clear active states
-      document.querySelectorAll('.model-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
+    // Show current model
+    function showCurrentModel(markerData) {
+      modelNameEl.textContent = `${markerData.emoji} ${markerData.name}`;
+      currentModelEl.style.display = 'block';
+      currentVisibleMarker = markerData.name;
     }
 
-    // Get current active entity
-    function getCurrentEntity() {
-      if (allModelsVisible) return containerEl;
-      if (currentModelName) {
-        return document.getElementById(models[currentModelName].id);
-      }
-      return null;
+    // Hide current model
+    function hideCurrentModel() {
+      currentModelEl.style.display = 'none';
+      currentVisibleMarker = null;
     }
 
-    // Position controls
-    document.querySelectorAll('.pos-btn[data-axis]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const entity = getCurrentEntity();
-        if (!entity) return;
+    // Setup marker event listeners
+    function setupMarkerEvents() {
+      Object.keys(qrMapping).forEach(markerId => {
+        const marker = document.getElementById(markerId);
+        const markerData = qrMapping[markerId];
         
-        const axis = btn.getAttribute('data-axis');
-        const direction = btn.getAttribute('data-direction') === '+' ? 1 : -1;
-        const amount = 0.1;
-        
-        const pos = entity.getAttribute('position');
-        const newPos = { ...pos };
-        newPos[axis] = pos[axis] + (amount * direction);
-        
-        entity.setAttribute('position', newPos);
-        
-        console.log(`${currentModelName} Position:`, newPos);
-  // ...existing code...
-      });
-    });
-
-    // Save position to localStorage
-    document.getElementById('btn-save-pos').addEventListener('click', () => {
-      const entity = getCurrentEntity();
-      if (!entity || !currentModelName) return;
-      
-      const pos = entity.getAttribute('position');
-      const scale = entity.getAttribute('scale');
-      const rotation = entity.getAttribute('rotation');
-      
-      const savedData = {
-        position: pos,
-        scale: scale,
-        rotation: rotation
-      };
-      
-      localStorage.setItem(`model-pos-${currentModelName}`, JSON.stringify(savedData));
-  // ...existing code...
-    });
-
-    // Load saved positions
-    function loadSavedPositions() {
-      order.forEach(modelName => {
-        const saved = localStorage.getItem(`model-pos-${modelName}`);
-        if (saved) {
-          try {
-            const data = JSON.parse(saved);
-            const entity = document.getElementById(models[modelName].id);
-            entity.setAttribute('position', data.position);
-            entity.setAttribute('scale', data.scale);
-            entity.setAttribute('rotation', data.rotation);
-          } catch (e) {
-            console.error('Error loading saved position:', e);
-          }
+        if (marker) {
+          // Marker found
+          marker.addEventListener('markerFound', () => {
+            console.log(`QR Code found: ${markerData.name}`);
+            foundMarkers.add(markerId);
+            updateMarkerStatus(markerId, true);
+            showCurrentModel(markerData);
+            
+            // Hide instructions after first marker found
+            if (foundMarkers.size === 1) {
+              setTimeout(() => {
+                instructionsEl.classList.add('hidden');
+              }, 2000);
+            }
+          });
+          
+          // Marker lost
+          marker.addEventListener('markerLost', () => {
+            console.log(`QR Code lost: ${markerData.name}`);
+            updateMarkerStatus(markerId, false);
+            
+            // Only hide if this was the currently visible marker
+            if (currentVisibleMarker === markerData.name) {
+              hideCurrentModel();
+            }
+          });
         }
       });
     }
 
-    // Scale controls
-    document.getElementById('btn-scale-up').addEventListener('click', () => {
-      const entity = allModelsVisible ? containerEl : getCurrentEntity();
-      if (!entity) return;
-      
-      const scale = entity.getAttribute('scale');
-      const newScale = {
-        x: scale.x * 1.2,
-        y: scale.y * 1.2, 
-        z: scale.z * 1.2
-      };
-      entity.setAttribute('scale', newScale);
-  // ...existing code...
-    });
-
-    document.getElementById('btn-scale-down').addEventListener('click', () => {
-      const entity = allModelsVisible ? containerEl : getCurrentEntity();
-      if (!entity) return;
-      
-      const scale = entity.getAttribute('scale');
-      const newScale = {
-        x: scale.x / 1.2,
-        y: scale.y / 1.2,
-        z: scale.z / 1.2
-      };
-      entity.setAttribute('scale', newScale);
-  // ...existing code...
-    });
-
-    // Rotation control
-    let isRotating = false;
-    document.getElementById('btn-rotate').addEventListener('click', () => {
-      isRotating = !isRotating;
-      const rotateBtn = document.getElementById('btn-rotate');
-      rotateBtn.style.backgroundColor = isRotating ? '#4CAF50' : '';
-  // ...existing code...
-      if (isRotating) {
-        rotateModel();
-      }
-    });
-
-    function rotateModel() {
-      if (!isRotating) return;
-      const entity = allModelsVisible ? containerEl : getCurrentEntity();
-      if (!entity) return;
-      
-      const rotation = entity.getAttribute('rotation');
-      entity.setAttribute('rotation', {
-        x: rotation.x,
-        y: rotation.y + 1,
-        z: rotation.z
-      });
-      requestAnimationFrame(rotateModel);
-    }
-
-    // Event listeners untuk tombol model
-    document.querySelectorAll('.model-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const modelName = btn.getAttribute('data-model');
-        currentIndex = order.indexOf(modelName);
-        showModel(modelName);
-      });
-    });
-
-  // ...existing code...
-
-    // Cycle models
-    document.getElementById('btn-cycle').addEventListener('click', () => {
-      currentIndex = (currentIndex + 1) % order.length;
-      showModel(order[currentIndex]);
-    });
-
-    // Tambahkan ini sebelum event listener scene loaded
-async function initializeMobileAR() {
-  try {
-    // Request camera permission
-    const stream = await navigator.mediaDevices.getUserMedia({ 
-      video: { 
-        facingMode: 'environment',
-        width: { ideal: 1280 },
-        height: { ideal: 960 }
-      } 
-    });
-    
-    // Stop the stream immediately (AR.js akan mengambil alih)
-    stream.getTracks().forEach(track => track.stop());
-    
-    // Request fullscreen if supported
-    if (document.documentElement.requestFullscreen) {
-      // Delay fullscreen request to avoid blocking
-      setTimeout(() => {
-        document.documentElement.requestFullscreen().catch(e => {
-          console.log('Fullscreen not available or denied');
+    // Initialize camera for mobile
+    async function initializeMobileAR() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 960 }
+          } 
         });
-      }, 1000);
+        
+        // Stop the stream (AR.js will handle camera)
+        stream.getTracks().forEach(track => track.stop());
+        
+        console.log('Mobile AR camera initialized');
+        
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        alert('Tidak dapat mengakses kamera. Pastikan Anda memberikan izin kamera.');
+      }
     }
-    
-    console.log('Mobile AR initialized successfully');
-    
-  } catch (error) {
-    console.error('Error initializing mobile AR:', error);
-    
-    // Fallback: show instruction modal
-    showMobileInstructions();
-  }
-}
 
-function showMobileInstructions() {
-  const modal = document.createElement('div');
-  modal.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.9);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 99999;
-    font-family: sans-serif;
-    text-align: center;
-    padding: 20px;
-  `;
-  
-  modal.innerHTML = `
-    <h2>Setup AR Mode</h2>
-    <p>Untuk pengalaman AR terbaik:</p>
-    <ol style="text-align: left; margin: 20px 0;">
-      <li>Izinkan akses kamera</li>
-      <li>Putar ke mode landscape</li>
-      <li>Tap fullscreen jika diminta</li>
-    </ol>
-    <button onclick="this.parentElement.remove(); initializeMobileAR();" 
-            style="background: #4CAF50; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; margin-top: 20px;">
-      Start AR
-    </button>
-  `;
-  
-  document.body.appendChild(modal);
-}
+    // Auto-initialize for mobile
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+      initializeMobileAR();
+    }
 
-// Auto-initialize untuk mobile
-if (/Mobi|Android/i.test(navigator.userAgent)) {
-  // Tunggu sampai DOM ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeMobileAR);
-  } else {
-    initializeMobileAR();
-  }
-}
-
-// Handle orientation change
-window.addEventListener('orientationchange', () => {
-  setTimeout(() => {
-    window.location.reload();
-  }, 500);
-});
-
-    // Scene loaded
-    sceneEl.addEventListener('loaded', function() {
+    // Scene ready event
+    document.querySelector('a-scene').addEventListener('loaded', function() {
+      console.log('A-Frame scene loaded');
+      
       setTimeout(() => {
         loadingEl.style.display = 'none';
-        loadSavedPositions();
-        showModel(order[currentIndex]);
+        setupMarkerEvents();
+        
+        // Show initial instructions
+        instructionsEl.style.display = 'block';
+        
+        // Auto-hide instructions after 10 seconds if no QR found
+        setTimeout(() => {
+          if (foundMarkers.size === 0) {
+            instructionsEl.classList.add('hidden');
+          }
+        }, 10000);
+        
       }, 1500);
     });
 
-    // Keyboard controls
-    document.addEventListener('keydown', (e) => {
-      switch(e.key) {
-        case 'ArrowRight':
-          currentIndex = (currentIndex + 1) % order.length;
-          showModel(order[currentIndex]);
-          break;
-        case 'ArrowLeft':
-          currentIndex = (currentIndex - 1 + order.length) % order.length;
-          showModel(order[currentIndex]);
-          break;
-        case 'a':
-        case 'A':
-          // ...existing code...
-          break;
-      }
-    });
-
-    // Touch gestures for mobile
-    let touchStartY = 0;
-    let touchStartX = 0;
-
-    document.addEventListener('touchstart', (e) => {
-      touchStartY = e.touches[0].clientY;
-      touchStartX = e.touches[0].clientX;
-    });
-
-    document.addEventListener('touchend', (e) => {
-      if (!touchStartY || !touchStartX) return;
-
-      const touchEndY = e.changedTouches[0].clientY;
-      const touchEndX = e.changedTouches[0].clientX;
-      const diffY = touchStartY - touchEndY;
-      const diffX = touchStartX - touchEndX;
-
-      // Only trigger if swipe is significant
-      if (Math.abs(diffX) > 50 && Math.abs(diffY) < 100) {
-        if (diffX > 0) {
-          // Swipe left - next model
-          currentIndex = (currentIndex + 1) % order.length;
-          showModel(order[currentIndex]);
-        } else {
-          // Swipe right - previous model
-          currentIndex = (currentIndex - 1 + order.length) % order.length;
-          showModel(order[currentIndex]);
-        }
-      }
-
-      touchStartY = 0;
-      touchStartX = 0;
+    // Handle orientation change
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     });
 
     // Error handling
     window.addEventListener('error', function(e) {
       console.error('Global error:', e.error);
+    });
+
+    // Debug: Log when any marker is detected
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add debug logging
+      setInterval(() => {
+        if (foundMarkers.size > 0) {
+          console.log('Currently found markers:', Array.from(foundMarkers));
+        }
+      }, 5000);
     });
   </script>
 </body>
