@@ -3,115 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-  
-  <!-- Mobile optimization -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#000000">
-  
+
   <title>QR Hantu Scanner - AR Game</title>
 
+  <!-- A-Frame & AR.js -->
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/3.3.2/aframe/build/aframe-ar.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <script src="https://raw.githack.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-detector.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
-    
-    body { 
-      margin: 0; 
+    body {
+      margin: 0;
       overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #000;
-    }
-
-    /* Instructions Panel */
-    .instructions {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      right: 12px;
-      background: rgba(0,0,0,0.9);
-      color: white;
-      padding: 16px;
-      border-radius: 12px;
-      z-index: 10000;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.2);
-      text-align: center;
-    }
-
-    .instructions h3 {
-      margin: 0 0 8px 0;
-      font-size: 16px;
-      color: #4CAF50;
-    }
-
-    .instructions p {
-      margin: 0;
-      font-size: 12px;
-      opacity: 0.9;
-    }
-
-    /* Current Model Display */
-    .current-model {
-      position: absolute;
-      left: 50%;
-      bottom: 100px;
-      transform: translateX(-50%);
-      z-index: 10000;
-      background: rgba(0,0,0,0.9);
-      color: white;
-      padding: 12px 20px;
-      border-radius: 25px;
-      font-size: 16px;
-      font-weight: bold;
-      backdrop-filter: blur(10px);
-      border: 2px solid #4CAF50;
-      display: none;
-    }
-
-    /* QR List */
-    .qr-list {
-      position: absolute;
-      right: 12px;
-      top: 12px;
-      background: rgba(0,0,0,0.9);
-      color: white;
-      padding: 12px;
-      border-radius: 12px;
-      z-index: 10000;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.2);
-      font-size: 11px;
-      max-width: 120px;
-    }
-
-    .qr-list h4 {
-      margin: 0 0 8px 0;
-      font-size: 12px;
-      color: #4CAF50;
-    }
-
-    .qr-item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-      padding: 4px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .qr-item:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-    }
-
-    .qr-found {
-      color: #4CAF50;
-      font-weight: bold;
     }
 
     /* Loading Screen */
@@ -142,322 +49,166 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
-    /* Hide instructions after some time */
-    .instructions.hidden {
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      pointer-events: none;
-    }
-
-    /* Responsive */
-    @media (max-width: 480px) {
-      .instructions {
-        left: 8px;
-        right: 8px;
-        top: 8px;
-        padding: 12px;
-      }
-      
-      .qr-list {
-        right: 8px;
-        top: 8px;
-        display: none; /* Hide on very small screens */
-      }
-      
-      .current-model {
-        bottom: 80px;
-        font-size: 14px;
-      }
-    }
   </style>
 </head>
 <body>
-  <div class="loading" id="loading">Mengaktifkan Kamera QR Scanner...</div>
+  <!-- Loading -->
+  <div class="loading" id="loading">Mengaktifkan Kamera...</div>
 
-  <!-- Instructions -->
-  <div class="instructions" id="instructions">
-    <h3>🎯 QR Hantu Scanner</h3>
-    <p>Arahkan kamera ke QR code untuk memunculkan hantu!</p>
-  </div>
-
-  <!-- Current Model Display -->
-  <div class="current-model" id="currentModel">
-    <span id="modelName">-</span>
-  </div>
-
-  <!-- QR List -->
-  <div class="qr-list">
-    <h4>QR Codes:</h4>
-    <div class="qr-item">
-      <span>👻 Gundul</span>
-      <span id="status-gundul">-</span>
-    </div>
-    <div class="qr-item">
-      <span>🧒 Tuyul</span>
-      <span id="status-tuyul">-</span>
-    </div>
-    <div class="qr-item">
-      <span>👹 Genderuwo</span>
-      <span id="status-genderuwo">-</span>
-    </div>
-    <div class="qr-item">
-      <span>👘 Kuntilanak</span>
-      <span id="status-kuntilanak">-</span>
-    </div>
-    <div class="qr-item">
-      <span>⚪ Pocong</span>
-      <span id="status-pocong">-</span>
-    </div>
-    <div class="qr-item">
-      <span>👵 Wewe</span>
-      <span id="status-wewe">-</span>
-    </div>
-  </div>
-
-  <!-- A-Frame Scene with QR Markers -->
-  <a-scene 
-    embedded 
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
-    renderer="logarithmicDepthBuffer: true; colorManagement: true; sortObjects: true;"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false"
-    background="color: black">
-    
-    <!-- Define Assets -->
+  <!-- AR Scene -->
+  <a-scene
+    vr-mode-ui="enabled: false;"
+    loading-screen="enabled: false;"
+    renderer="logarithmicDepthBuffer: true;"
+    arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+    embedded
+    gesture-detector
+  >
+    <!-- Assets -->
     <a-assets>
-      <a-asset-item id="gundul" src="./Assets/GundulPringis.glb"></a-asset-item>
-      <a-asset-item id="tuyul" src="./Assets/Tuyul2.glb"></a-asset-item>
-      <a-asset-item id="genderuwo" src="./Assets/Genderuwo2.glb"></a-asset-item>
-      <a-asset-item id="kuntilanak" src="./Assets/Kuntilanak.glb"></a-asset-item>
-      <a-asset-item id="pocong" src="./Assets/Pocong.glb"></a-asset-item>
-      <a-asset-item id="wewe" src="./Assets/Wewegombel.glb"></a-asset-item>
+      <a-asset-item id="animated-asset" src="./Assets/asset.glb"></a-asset-item>
+      <a-asset-item id="animated-assetGenderuwo" src="./Assets/assetGenderuwo.glb"></a-asset-item>
+      <a-asset-item id="animated-assetGundulpringis" src="./Assets/assetGundulpringis.glb"></a-asset-item>
+      <a-asset-item id="animated-assetKuntilanak" src="./Assets/assetKuntilanak.glb"></a-asset-item>
+      <a-asset-item id="animated-assetPocong" src="./Assets/assetPocong.glb"></a-asset-item>
+      <a-asset-item id="animated-assetTuyul" src="./Assets/assetTuyul.glb"></a-asset-item>
+      <a-asset-item id="animated-assetWewegombel" src="./Assets/assetWewegombel.glb"></a-asset-item>
     </a-assets>
 
-    <!-- QR Code Markers -->
-    <!-- Marker untuk Gundul (ID: 0) -->
-    <a-marker type="barcode" value="0" id="marker-gundul">
-      <a-entity 
-        gltf-model="#gundul" 
-        scale="0.5 0.5 0.5" 
-        position="0 0 0"
-        rotation="0 0 0"
+    <!-- Marker -->
+    <a-marker
+      type="pattern"
+      preset="custom"
+      url="./Assets/marker.patt"
+      raycaster="objects: .clickable"
+      emitevents="true"
+      cursor="fuse: false; rayOrigin: mouse;"
+    >
+      <a-entity
+        scale="0.3 0.3 0.3"
         animation-mixer="loop: repeat"
-        class="model-entity">
-      </a-entity>
+        gltf-model="#animated-asset"
+        class="clickable"
+        gesture-handler
+      ></a-entity>
     </a-marker>
 
-    <!-- Marker untuk Tuyul (ID: 1) -->
-    <a-marker type="barcode" value="1" id="marker-tuyul">
-      <a-entity 
-        gltf-model="#tuyul" 
-        scale="0.4 0.4 0.4" 
-        position="0 0 0"
-        rotation="0 0 0"
+    <!-- Marker Genderuwo -->
+    <a-marker
+      type="pattern"
+      preset="custom"
+      url="./Assets/markerGenderuwo.patt"
+      raycaster="objects: .clickable"
+      emitevents="true"
+      cursor="fuse: false; rayOrigin: mouse;"
+    >
+      <a-entity
+        scale="0.3 0.3 0.3"
         animation-mixer="loop: repeat"
-        class="model-entity">
-      </a-entity>
+        gltf-model="#animated-assetGenderuwo"
+        class="clickable"
+        gesture-handler
+      ></a-entity>
     </a-marker>
 
-    <!-- Marker untuk Genderuwo (ID: 2) -->
-    <a-marker type="barcode" value="2" id="marker-genderuwo">
-      <a-entity 
-        gltf-model="#genderuwo" 
-        scale="0.5 0.5 0.5" 
-        position="0 0 0"
-        rotation="0 0 0"
+    <!-- Marker Gundul -->
+    <a-marker
+      type="pattern"
+      preset="custom"
+      url="./Assets/markerGundulpringis.patt"
+      raycaster="objects: .clickable"
+      emitevents="true"
+      cursor="fuse: false; rayOrigin: mouse;"
+    >
+      <a-entity
+        scale="0.3 0.3 0.3"
         animation-mixer="loop: repeat"
-        class="model-entity">
-      </a-entity>
+        gltf-model="#animated-assetGundulpringis"
+        class="clickable"
+        gesture-handler
+      ></a-entity>
     </a-marker>
 
-    <!-- Marker untuk Kuntilanak (ID: 3) -->
-    <a-marker type="barcode" value="3" id="marker-kuntilanak">
-      <a-entity 
-        gltf-model="#kuntilanak" 
-        scale="0.16 0.16 0.16" 
-        position="0 0 0"
-        rotation="0 0 0"
+    <!-- Marker Kuntilanak -->
+    <a-marker
+      type="pattern"
+      preset="custom"
+      url="./Assets/markerKuntilanak.patt"
+      raycaster="objects: .clickable"
+      emitevents="true"
+      cursor="fuse: false; rayOrigin: mouse;"
+    >
+      <a-entity
+        scale="0.3 0.3 0.3"
         animation-mixer="loop: repeat"
-        class="model-entity">
-      </a-entity>
+        gltf-model="#animated-assetKuntilanak"
+        class="clickable"
+        gesture-handler
+      ></a-entity>
     </a-marker>
 
-    <!-- Marker untuk Pocong (ID: 4) -->
-    <a-marker type="barcode" value="4" id="marker-pocong">
-      <a-entity 
-        gltf-model="#pocong" 
-        scale="0.28 0.28 0.28" 
-        position="0 0 0"
-        rotation="0 0 0"
+    <!-- Marker Pocong -->
+    <a-marker
+      type="pattern"
+      preset="custom"
+      url="./Assets/markerPocong.patt"
+      raycaster="objects: .clickable"
+      emitevents="true"
+      cursor="fuse: false; rayOrigin: mouse;"
+    >
+      <a-entity
+        scale="0.3 0.3 0.3"
         animation-mixer="loop: repeat"
-        class="model-entity">
-      </a-entity>
+        gltf-model="#animated-assetPocong"
+        class="clickable"
+        gesture-handler
+      ></a-entity>
     </a-marker>
 
-    <!-- Marker untuk Wewe (ID: 5) -->
-    <a-marker type="barcode" value="5" id="marker-wewe">
-      <a-entity 
-        gltf-model="#wewe" 
-        scale="0.11 0.11 0.11" 
-        position="0 0 0"
-        rotation="0 0 0"
+    <!-- Marker Tuyul -->
+    <a-marker
+      type="pattern"
+      preset="custom"
+      url="./Assets/markerTuyul.patt"
+      raycaster="objects: .clickable"
+      emitevents="true"
+      cursor="fuse: false; rayOrigin: mouse;"
+    >
+      <a-entity
+        scale="0.3 0.3 0.3"
         animation-mixer="loop: repeat"
-        class="model-entity">
-      </a-entity>
+        gltf-model="#animated-assetTuyul"
+        class="clickable"
+        gesture-handler
+      ></a-entity>
+    </a-marker>
+
+    <!-- Marker Wewe Gombel -->
+    <a-marker
+      type="pattern"
+      preset="custom"
+      url="./Assets/markerWewegombel.patt"
+      raycaster="objects: .clickable"
+      emitevents="true"
+      cursor="fuse: false; rayOrigin: mouse;"
+    >
+      <a-entity
+        scale="0.3 0.3 0.3"
+        animation-mixer="loop: repeat"
+        gltf-model="#animated-assetWewegombel"
+        class="clickable"
+        gesture-handler
+      ></a-entity>
     </a-marker>
 
     <!-- Camera -->
-    <a-entity camera look-controls-enabled="false" wasd-controls-enabled="false"></a-entity>
+    <a-entity camera></a-entity>
   </a-scene>
 
   <script>
-    // QR Code mapping
-    const qrMapping = {
-      'marker-gundul': { name: 'Gundul', emoji: '👻', id: 'gundul' },
-      'marker-tuyul': { name: 'Tuyul', emoji: '🧒', id: 'tuyul' },
-      'marker-genderuwo': { name: 'Genderuwo', emoji: '👹', id: 'genderuwo' },
-      'marker-kuntilanak': { name: 'Kuntilanak', emoji: '👘', id: 'kuntilanak' },
-      'marker-pocong': { name: 'Pocong', emoji: '⚪', id: 'pocong' },
-      'marker-wewe': { name: 'Wewe', emoji: '👵', id: 'wewe' }
-    };
-
-    // Found markers tracking
-    const foundMarkers = new Set();
-    let currentVisibleMarker = null;
-
-    // DOM elements
-    const loadingEl = document.getElementById('loading');
-    const instructionsEl = document.getElementById('instructions');
-    const currentModelEl = document.getElementById('currentModel');
-    const modelNameEl = document.getElementById('modelName');
-
-    // Update status display
-    function updateMarkerStatus(markerId, found) {
-      const statusEl = document.getElementById(`status-${qrMapping[markerId].id}`);
-      if (statusEl) {
-        statusEl.textContent = found ? '✓' : '-';
-        statusEl.className = found ? 'qr-found' : '';
-      }
-    }
-
-    // Show current model
-    function showCurrentModel(markerData) {
-      modelNameEl.textContent = `${markerData.emoji} ${markerData.name}`;
-      currentModelEl.style.display = 'block';
-      currentVisibleMarker = markerData.name;
-    }
-
-    // Hide current model
-    function hideCurrentModel() {
-      currentModelEl.style.display = 'none';
-      currentVisibleMarker = null;
-    }
-
-    // Setup marker event listeners
-    function setupMarkerEvents() {
-      Object.keys(qrMapping).forEach(markerId => {
-        const marker = document.getElementById(markerId);
-        const markerData = qrMapping[markerId];
-        
-        if (marker) {
-          // Marker found
-          marker.addEventListener('markerFound', () => {
-            console.log(`QR Code found: ${markerData.name}`);
-            foundMarkers.add(markerId);
-            updateMarkerStatus(markerId, true);
-            showCurrentModel(markerData);
-            
-            // Hide instructions after first marker found
-            if (foundMarkers.size === 1) {
-              setTimeout(() => {
-                instructionsEl.classList.add('hidden');
-              }, 2000);
-            }
-          });
-          
-          // Marker lost
-          marker.addEventListener('markerLost', () => {
-            console.log(`QR Code lost: ${markerData.name}`);
-            updateMarkerStatus(markerId, false);
-            
-            // Only hide if this was the currently visible marker
-            if (currentVisibleMarker === markerData.name) {
-              hideCurrentModel();
-            }
-          });
-        }
-      });
-    }
-
-    // Initialize camera for mobile
-    async function initializeMobileAR() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 960 }
-          } 
-        });
-        
-        // Stop the stream (AR.js will handle camera)
-        stream.getTracks().forEach(track => track.stop());
-        
-        console.log('Mobile AR camera initialized');
-        
-      } catch (error) {
-        console.error('Error accessing camera:', error);
-        alert('Tidak dapat mengakses kamera. Pastikan Anda memberikan izin kamera.');
-      }
-    }
-
-    // Auto-initialize for mobile
-    if (/Mobi|Android/i.test(navigator.userAgent)) {
-      initializeMobileAR();
-    }
-
-    // Scene ready event
+    // Hide loading once scene is ready
     document.querySelector('a-scene').addEventListener('loaded', function() {
-      console.log('A-Frame scene loaded');
-      
-      setTimeout(() => {
-        loadingEl.style.display = 'none';
-        setupMarkerEvents();
-        
-        // Show initial instructions
-        instructionsEl.style.display = 'block';
-        
-        // Auto-hide instructions after 10 seconds if no QR found
-        setTimeout(() => {
-          if (foundMarkers.size === 0) {
-            instructionsEl.classList.add('hidden');
-          }
-        }, 10000);
-        
-      }, 1500);
-    });
-
-    // Handle orientation change
-    window.addEventListener('orientationchange', () => {
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-    });
-
-    // Error handling
-    window.addEventListener('error', function(e) {
-      console.error('Global error:', e.error);
-    });
-
-    // Debug: Log when any marker is detected
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add debug logging
-      setInterval(() => {
-        if (foundMarkers.size > 0) {
-          console.log('Currently found markers:', Array.from(foundMarkers));
-        }
-      }, 5000);
+      document.getElementById('loading').style.display = 'none';
     });
   </script>
 </body>
