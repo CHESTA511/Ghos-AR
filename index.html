@@ -64,6 +64,10 @@
     embedded
     gesture-detector
   >
+   <!-- Lighting -->
+  <a-entity light="type: ambient; color: #ffffff; intensity: 1.8"></a-entity>
+  <a-entity light="type: directional; color: #ffffff; intensity: 1.2" position="0 1 2"></a-entity>
+
     <!-- Assets -->
     <a-assets>
       <a-asset-item id="animated-asset" src="./Assets/asset.glb"></a-asset-item>
@@ -102,6 +106,7 @@
       emitevents="true"
       cursor="fuse: false; rayOrigin: mouse;"
     >
+    <a-entity light="type: point; intensity: 1; color: #ffffff" position="0 1 1"></a-entity>
       <a-entity
         scale="0.8 0.8 0.8"
         animation-mixer="loop: repeat"
@@ -192,6 +197,7 @@
       emitevents="true"
       cursor="fuse: false; rayOrigin: mouse;"
     >
+    <a-entity light="type: point; intensity: 3; color: #ffffff" position="0 1 1"></a-entity>
       <a-entity
         scale="0.1 0.1 0.1"
         animation-mixer="loop: repeat"
